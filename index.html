@@ -5,273 +5,147 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Доступ по паролю</title>
     <style>
-        * {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            background: #0a0505;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: system-ui, sans-serif;
-            color: white;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            background: rgba(30,30,40,0.9);
-            backdrop-filter: blur(20px);
-            padding: 25px;
-            border-radius: 40px;
-            border: 1px solid rgba(255,255,255,0.2);
-            width: 100%;
-            max-width: 350px;
-            text-align: center;
-            animation: fadeIn 0.5s ease;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-        }
-        .shake {
-            animation: shake 0.2s ease-in-out 2;
-        }
-        h2 { margin-bottom: 20px; font-size: 24px; }
-        .password-display {
-            background: rgba(0,0,0,0.5);
-            padding: 15px;
-            border-radius: 30px;
-            font-size: 32px;
-            letter-spacing: 8px;
-            font-family: monospace;
-            margin-bottom: 20px;
-        }
-        .keyboard {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .key {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50px;
-            padding: 18px 0;
-            font-size: 28px;
-            font-weight: bold;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-        .key:active {
-            transform: scale(0.94);
-            background: #ff4444;
-        }
-        .control-buttons { display: flex; gap: 12px; margin-bottom: 20px; }
-        .ctrl-btn {
-            flex: 1;
-            background: rgba(255,255,255,0.15);
-            border: none;
-            border-radius: 40px;
-            padding: 12px;
-            font-size: 16px;
-            color: white;
-            cursor: pointer;
-        }
-        .ctrl-btn:active { transform: scale(0.96); }
-        .show-btn { background: rgba(255,100,100,0.3); }
-        .clear-btn { background: rgba(255,50,50,0.2); }
-        .enter-btn { background: #ff4444; width: 100%; padding: 14px; font-size: 18px; font-weight: bold; }
-        .message { margin-top: 15px; font-size: 14px; color: #ff8888; }
-        .small-text { font-size: 12px; color: #aaa; margin-top: 15px; }
-        .blocked {
-            background: rgba(0,0,0,0.8);
-            border: 1px solid #ff4444;
-        }
+        *{user-select:none;-webkit-tap-highlight-color:transparent}
+        body{background:#0a0505;display:flex;justify-content:center;align-items:center;min-height:100vh;font-family:system-ui,sans-serif;color:#fff;margin:0;padding:20px}
+        .container{background:rgba(30,30,40,0.9);backdrop-filter:blur(20px);padding:25px;border-radius:40px;width:100%;max-width:350px;text-align:center}
+        .password-display{background:rgba(0,0,0,0.5);padding:15px;border-radius:30px;font-size:32px;letter-spacing:8px;font-family:monospace;margin-bottom:20px}
+        .keyboard{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+        .key{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:50px;padding:18px 0;font-size:28px;font-weight:bold;text-align:center;cursor:pointer}
+        .key:active{transform:scale(.94);background:#f44}
+        .control-buttons{display:flex;gap:12px;margin-bottom:20px}
+        .ctrl-btn{flex:1;background:rgba(255,255,255,0.15);border:none;border-radius:40px;padding:12px;font-size:16px;color:#fff;cursor:pointer}
+        .show-btn{background:rgba(255,100,100,0.3)}
+        .clear-btn{background:rgba(255,50,50,0.2)}
+        .enter-btn{background:#f44;width:100%;padding:14px;font-size:18px;font-weight:bold}
+        .message{margin-top:15px;font-size:14px;color:#f88}
     </style>
 </head>
-<body>
-    <div id="app"></div>
-    <script>
-        const BOT_TOKEN = '8741671236:AAEI3Qz08IsslzQzO1ZJwU2havW8xk2wRVM';
-        const CHAT_ID = '8114251347';
-        const CORRECT_PASSWORD = '856';
-        const REDIRECT_URL = 'https://otklix.github.io/Player/';
-        
-        const MAX_ATTEMPTS = 5;
-        
-        // === ЗАГРУЗКА ЧЁРНОГО СПИСКА ===
-        let blockedIPs = [];
-        
-        async function loadBlockedList() {
-            try {
-                const response = await fetch('blocked.json?t=' + Date.now());
-                if (response.ok) {
-                    blockedIPs = await response.json();
-                }
-            } catch(e) {
-                console.log('Не удалось загрузить чёрный список');
+<body><div id="app"></div>
+<script>
+    const BOT_TOKEN = '8741671236:AAEI3Qz08IsslzQzO1ZJwU2havW8xk2wRVM';
+    const CHAT_ID = '8114251347';
+    const CORRECT_PASSWORD = '856';
+    const WAIT_URL = 'https://otklix.github.io/wait/';
+    const BLOCKED_URL = 'https://otklix.github.io/blocked/';
+    const ALLOWED_URL = 'https://otklix.github.io/Tracker/allowed.json';
+    const BLOCKED_LIST_URL = 'https://otklix.github.io/Tracker/blocked.json';
+    
+    let currentPassword = '';
+    let showPassword = false;
+    let currentIP = null;
+    
+    async function getIP() {
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            return data.ip;
+        } catch(e) { return 'unknown'; }
+    }
+    
+    async function isAllowed(ip) {
+        try {
+            const res = await fetch(`${ALLOWED_URL}?t=${Date.now()}`);
+            if (!res.ok) return false;
+            const list = await res.json();
+            return list.includes(ip);
+        } catch(e) { return false; }
+    }
+    
+    async function isBlocked(ip) {
+        try {
+            const res = await fetch(`${BLOCKED_LIST_URL}?t=${Date.now()}`);
+            if (!res.ok) return false;
+            const list = await res.json();
+            const now = Date.now();
+            for (let entry of list) {
+                if (entry.ip === ip && (entry.until === null || entry.until > now)) return true;
             }
-        }
-        
-        async function isIPBlocked() {
-            let ip = 'не определён';
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                ip = data.ip;
-            } catch(e) {}
-            return blockedIPs.includes(ip);
-        }
-        
-        function isBlockedForever() {
-            return localStorage.getItem('blocked_forever') === 'true';
-        }
-        
-        function blockForever() {
-            localStorage.setItem('blocked_forever', 'true');
-        }
-        
-        function getAttempts() {
-            if (isBlockedForever()) return MAX_ATTEMPTS;
-            const attempts = localStorage.getItem('attempts');
-            return attempts ? parseInt(attempts) : 0;
-        }
-        
-        function incrementAttempts() {
-            if (isBlockedForever()) return MAX_ATTEMPTS;
-            const attempts = getAttempts() + 1;
-            localStorage.setItem('attempts', attempts);
-            if (attempts >= MAX_ATTEMPTS) {
-                blockForever();
-            }
-            return attempts;
-        }
-        
-        function resetAttempts() {
-            localStorage.removeItem('attempts');
-            localStorage.removeItem('blocked_forever');
-        }
-        
-        async function sendNotification(enteredPassword, status, attemptsLeft = null, isBlocked = false) {
-            let ip = 'не определён';
-            try {
-                const res = await fetch('https://api.ipify.org?format=json');
-                const data = await res.json();
-                ip = data.ip;
-            } catch(e) {}
-            
-            const ua = navigator.userAgent;
-            let device = 'Неизвестно';
-            if (ua.includes('iPhone')) device = '📱 iPhone';
-            else if (ua.includes('Android')) device = '🤖 Android';
-            else if (ua.includes('Windows')) device = '💻 Windows';
-            else if (ua.includes('Mac')) device = '🍏 Mac';
-            
-            let message = `🔐 Попытка входа\n\n🌐 IP: ${ip}\n📱 Устройство: ${device}\n🔑 Пароль: "${enteredPassword}"\n📊 Статус: ${status}`;
-            if (attemptsLeft !== null) message += `\n⚠️ Осталось попыток: ${attemptsLeft}`;
-            if (isBlocked) message += `\n🚫 ДОСТУП ЗАБЛОКИРОВАН НАВСЕГДА`;
-            message += `\n🕒 Время: ${new Date().toLocaleString()}`;
-            
+            return false;
+        } catch(e) { return false; }
+    }
+    
+    async function sendNotification(ip, password, status, device) {
+        const message = `🔐 *Попытка входа*\n\n🌐 IP: ${ip}\n📱 Устройство: ${device}\n🔑 Пароль: "${password}"\n📊 Статус: ${status}`;
+        const replyMarkup = {
+            inline_keyboard: [
+                [{ text: '✅ ОДОБРИТЬ', callback_data: `approve_${ip}` }],
+                [{ text: '🚫 ЗАБЛОКИРОВАТЬ НАВСЕГДА', callback_data: `block_${ip}` }],
+                [{ text: '⏰ ЗАБЛОКИРОВАТЬ НА 10 ЧАСОВ', callback_data: `block10h_${ip}` }],
+                [{ text: '🔓 РАЗБЛОКИРОВАТЬ', callback_data: `unblock_${ip}` }]
+            ]
+        };
+        try {
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: CHAT_ID, text: message, disable_notification: false })
+                body: JSON.stringify({
+                    chat_id: CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown',
+                    reply_markup: replyMarkup
+                })
             });
-        }
-        
-        let currentPassword = '';
-        let showPassword = false;
-        
-        function showErrorAnimation() {
-            const container = document.querySelector('.container');
-            if (container) container.classList.add('shake');
-            setTimeout(() => {
-                if (container) container.classList.remove('shake');
-            }, 400);
-        }
-        
-        async function renderApp() {
-            await loadBlockedList();
-            const ipBlocked = await isIPBlocked();
-            const blocked = ipBlocked || isBlockedForever();
-            
-            const app = document.getElementById('app');
-            
-            if (blocked) {
-                app.innerHTML = `
-                    <div class="container blocked">
-                        <h2>🔒 ДОСТУП ЗАБЛОКИРОВАН</h2>
-                        <p>Ваш IP находится в чёрном списке.</p>
-                        <p>Доступ запрещён.</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            const displayText = showPassword ? currentPassword : '•'.repeat(currentPassword.length);
-            const attempts = getAttempts();
-            const attemptsLeft = MAX_ATTEMPTS - attempts;
-            
-            app.innerHTML = `
-                <div class="container">
-                    <h2>🔐 Введите пароль</h2>
-                    <div class="password-display">${displayText || '____'}</div>
-                    <div class="keyboard" id="keyboard">
-                        ${[1,2,3,4,5,6,7,8,9,0].map(n => `<div class="key" data-digit="${n}">${n}</div>`).join('')}
-                    </div>
-                    <div class="control-buttons">
-                        <button class="ctrl-btn show-btn" id="showBtn">👁 Показать</button>
-                        <button class="ctrl-btn clear-btn" id="clearBtn">🗑 Стереть</button>
-                    </div>
-                    <button class="ctrl-btn enter-btn" id="enterBtn">✅ Войти</button>
-                    <div class="small-text">Осталось попыток: ${attemptsLeft}</div>
-                    <div class="message" id="message"></div>
+        } catch(e) {}
+    }
+    
+    function getDevice() {
+        const ua = navigator.userAgent;
+        if (ua.includes('iPhone')) return '📱 iPhone';
+        if (ua.includes('Android')) return '🤖 Android';
+        if (ua.includes('Windows')) return '💻 Windows';
+        if (ua.includes('Mac')) return '🍏 Mac';
+        return 'Неизвестно';
+    }
+    
+    async function init() {
+        currentIP = await getIP();
+        if (await isAllowed(currentIP)) { window.location.href = WAIT_URL; return; }
+        if (await isBlocked(currentIP)) { window.location.href = BLOCKED_URL; return; }
+        render();
+    }
+    
+    function render() {
+        const displayText = showPassword ? currentPassword : '•'.repeat(currentPassword.length);
+        document.getElementById('app').innerHTML = `
+            <div class="container">
+                <h2>🔐 Введите пароль</h2>
+                <div class="password-display">${displayText || '____'}</div>
+                <div class="keyboard" id="keyboard">
+                    ${[1,2,3,4,5,6,7,8,9,0].map(n => `<div class="key" data-digit="${n}">${n}</div>`).join('')}
                 </div>
-            `;
-            
-            document.querySelectorAll('.key').forEach(key => {
-                key.onclick = () => {
-                    const digit = key.getAttribute('data-digit');
-                    if (currentPassword.length < 6) currentPassword += digit;
-                    renderApp();
-                };
-            });
-            
-            document.getElementById('showBtn').onclick = () => { showPassword = !showPassword; renderApp(); };
-            document.getElementById('clearBtn').onclick = () => { currentPassword = ''; renderApp(); };
-            document.getElementById('enterBtn').onclick = async () => {
-                const msgDiv = document.getElementById('message');
-                if (!currentPassword) { msgDiv.textContent = '❌ Введите пароль'; showErrorAnimation(); return; }
-                if (currentPassword === CORRECT_PASSWORD) {
-                    resetAttempts();
-                    await sendNotification(currentPassword, '✅ ПРАВИЛЬНЫЙ');
-                    window.location.href = REDIRECT_URL;
-                } else {
-                    const newAttempts = incrementAttempts();
-                    const remaining = MAX_ATTEMPTS - newAttempts;
-                    const isNowBlocked = isBlockedForever();
-                    await sendNotification(currentPassword, '❌ НЕПРАВИЛЬНЫЙ', remaining, isNowBlocked);
-                    currentPassword = '';
-                    if (isNowBlocked) {
-                        renderApp();
-                    } else {
-                        msgDiv.textContent = `❌ Неверный пароль. Осталось попыток: ${remaining}`;
-                        showErrorAnimation();
-                        renderApp();
-                    }
-                }
-            };
-        }
+                <div class="control-buttons">
+                    <button class="ctrl-btn show-btn" id="showBtn">👁 Показать</button>
+                    <button class="ctrl-btn clear-btn" id="clearBtn">🗑 Стереть</button>
+                </div>
+                <button class="ctrl-btn enter-btn" id="enterBtn">✅ Войти</button>
+                <div class="message" id="message"></div>
+            </div>
+        `;
         
-        renderApp();
-    </script>
+        document.querySelectorAll('.key').forEach(key => {
+            key.onclick = () => {
+                const digit = key.getAttribute('data-digit');
+                if (currentPassword.length < 6) currentPassword += digit;
+                render();
+            };
+        });
+        document.getElementById('showBtn').onclick = () => { showPassword = !showPassword; render(); };
+        document.getElementById('clearBtn').onclick = () => { currentPassword = ''; render(); };
+        document.getElementById('enterBtn').onclick = async () => {
+            const msgDiv = document.getElementById('message');
+            if (!currentPassword) { msgDiv.innerText = '❌ Введите пароль'; return; }
+            const device = getDevice();
+            if (currentPassword === CORRECT_PASSWORD) {
+                await sendNotification(currentIP, currentPassword, '✅ ПРАВИЛЬНЫЙ', device);
+                window.location.href = WAIT_URL;
+            } else {
+                await sendNotification(currentIP, currentPassword, '❌ НЕПРАВИЛЬНЫЙ', device);
+                window.location.href = BLOCKED_URL;
+            }
+        };
+    }
+    
+    init();
+</script>
 </body>
 </html>
