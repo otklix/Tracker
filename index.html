@@ -23,8 +23,6 @@
         .enter-btn{background:#f44;width:100%;padding:14px;font-size:18px;font-weight:bold}
         .message{margin-top:15px;font-size:14px;color:#f88}
         .small-text{font-size:12px;color:#aaa;margin-top:15px}
-        .waiting{display:inline-block;width:16px;height:16px;border:2px solid #f88;border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;margin-left:10px;vertical-align:middle}
-        @keyframes spin{to{transform:rotate(360deg)}}
     </style>
 </head>
 <body><div id="app"></div>
@@ -48,7 +46,7 @@
     }
     
     async function sendNotification(ip, password, status, device) {
-        const message = `🔐 *Попытка входа*\n\nIP: ${ip}\nУстройство: ${device}\nПароль: "${password}"\nСтатус: ${status}`;
+        const message = `🔐 Попытка входа\n\nIP: ${ip}\nУстройство: ${device}\nПароль: "${password}"\nСтатус: ${status}`;
         const replyMarkup = {
             inline_keyboard: [
                 [{ text: '✅ ОДОБРИТЬ', callback_data: `approve_${ip}` }],
@@ -63,7 +61,6 @@
                 body: JSON.stringify({
                     chat_id: CHAT_ID,
                     text: message,
-                    parse_mode: 'Markdown',
                     reply_markup: replyMarkup
                 })
             });
@@ -116,7 +113,7 @@
             else if (ua.includes('Windows')) device = '💻 Windows';
             else if (ua.includes('Mac')) device = '🍏 Mac';
             
-            statusDiv.innerHTML = '⏳ Отправка <span class="waiting"></span>';
+            statusDiv.innerHTML = '⏳ Отправка...';
             
             if (currentPassword === CORRECT_PASSWORD) {
                 await sendNotification(currentIP, currentPassword, '✅ ПРАВИЛЬНЫЙ', device);
