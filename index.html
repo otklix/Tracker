@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Введите пароль</title>
+    <title>Доступ по паролю</title>
     <style>
-        * {
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+        * { user-select: none; -webkit-tap-highlight-color: transparent; }
         body {
             background: #0a0505;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, sans-serif;
             color: white;
             margin: 0;
             padding: 20px;
@@ -39,7 +36,6 @@
             letter-spacing: 8px;
             font-family: monospace;
             margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,0.2);
         }
         .keyboard {
             display: grid;
@@ -56,9 +52,8 @@
             font-weight: bold;
             text-align: center;
             cursor: pointer;
-            transition: 0.1s;
         }
-        .key:active { transform: scale(0.94); background: #ff4444; }
+        .key:active { background: #ff4444; transform: scale(0.94); }
         .control-buttons { display: flex; gap: 12px; margin-bottom: 20px; }
         .ctrl-btn {
             flex: 1;
@@ -75,14 +70,12 @@
         .clear-btn { background: rgba(255,50,50,0.2); }
         .enter-btn { background: #ff4444; width: 100%; padding: 14px; font-size: 18px; font-weight: bold; }
         .message { margin-top: 15px; font-size: 14px; color: #ff8888; }
-        .blocked { color: #ff6666; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 30px; text-align: center; }
-        .small-text { font-size: 12px; color: #888; margin-top: 15px; }
+        .small-text { font-size: 12px; color: #aaa; margin-top: 15px; }
     </style>
 </head>
 <body>
     <div id="app"></div>
     <script>
-        // Плейсхолдеры — заменятся GitHub Actions
         const BOT_TOKEN = '__BOT_TOKEN__';
         const CHAT_ID = '__CHAT_ID__';
         const CORRECT_PASSWORD = '__CORRECT_PASSWORD__';
@@ -129,15 +122,18 @@
                 const data = await res.json();
                 ip = data.ip;
             } catch(e) {}
+            
             const ua = navigator.userAgent;
             let device = 'Неизвестно';
             if (ua.includes('iPhone')) device = '📱 iPhone';
             else if (ua.includes('Android')) device = '🤖 Android';
             else if (ua.includes('Windows')) device = '💻 Windows';
             else if (ua.includes('Mac')) device = '🍏 Mac';
+            
             let message = `🔐 Попытка входа\n\n🌐 IP: ${ip}\n📱 Устройство: ${device}\n🔑 Пароль: "${enteredPassword}"\n📊 Статус: ${status}`;
             if (attemptsLeft !== null) message += `\n⚠️ Осталось попыток: ${attemptsLeft}`;
             message += `\n🕒 Время: ${new Date().toLocaleString()}`;
+            
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -151,14 +147,17 @@
         function renderApp() {
             const app = document.getElementById('app');
             const blockUntil = getBlockData();
+            
             if (blockUntil) {
                 const minutesLeft = Math.ceil((blockUntil - Date.now()) / 60000);
-                app.innerHTML = `<div class="container blocked"><h2>🔒 Доступ заблокирован</h2><p>Слишком много неудачных попыток.</p><p>Попробуйте через ${minutesLeft} минут(ы).</p></div>`;
+                app.innerHTML = `<div class="container"><h2>🔒 Доступ заблокирован</h2><p>Слишком много неудачных попыток.</p><p>Попробуйте через ${minutesLeft} минут(ы).</p></div>`;
                 return;
             }
+            
             const displayText = showPassword ? currentPassword : '•'.repeat(currentPassword.length);
             const attempts = getAttempts();
             const attemptsLeft = MAX_ATTEMPTS - attempts;
+            
             app.innerHTML = `
                 <div class="container">
                     <h2>🔐 Введите пароль</h2>
@@ -175,6 +174,7 @@
                     <div class="message" id="message"></div>
                 </div>
             `;
+            
             document.querySelectorAll('.key').forEach(key => {
                 key.onclick = () => {
                     const digit = key.getAttribute('data-digit');
@@ -182,6 +182,7 @@
                     renderApp();
                 };
             });
+            
             document.getElementById('showBtn').onclick = () => { showPassword = !showPassword; renderApp(); };
             document.getElementById('clearBtn').onclick = () => { currentPassword = ''; renderApp(); };
             document.getElementById('enterBtn').onclick = async () => {
@@ -201,6 +202,7 @@
                 }
             };
         }
+        
         renderApp();
     </script>
 </body>
