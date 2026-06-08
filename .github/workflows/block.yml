@@ -1,4 +1,4 @@
-name: Block or Approve IP
+name: Process Access
 on: issues
 jobs:
   process:
@@ -19,6 +19,11 @@ jobs:
             IP=${TITLE#block_}; IP=${IP%_10h}
             UNTIL=$(($(date +%s%3N) + 10*60*60*1000))
             echo "$(jq --arg ip "$IP" --argjson until "$UNTIL" '. += [{"ip": $ip, "until": $until}]' blocked.json)" > blocked.json
+          fi
+          if [[ $TITLE == unblock_* ]]; then
+            IP=${TITLE#unblock_}
+            jq --arg ip "$IP" 'map(select(.ip != $ip))' blocked.json > blocked.json.tmp && mv blocked.json.tmp blocked.json
+            jq --arg ip "$IP" 'map(select(. != $ip))' allowed.json > allowed.json.tmp && mv allowed.json.tmp allowed.json
           fi
           git config user.name "Bot"
           git config user.email "bot@local"
