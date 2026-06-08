@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Доступ по паролю | 3D Сфера</title>
+    <title>Доступ по паролю</title>
     <style>
         * {
             margin: 0;
@@ -35,11 +35,11 @@
             display: block;
         }
 
-        /* Стеклянный контейнер (поверх 3D) */
+        /* Стеклянный контейнер */
         .container {
             position: relative;
             z-index: 2;
-            background: rgba(25, 20, 30, 0.65);
+            background: rgba(20, 20, 30, 0.65);
             backdrop-filter: blur(25px);
             border-radius: 60px;
             padding: 35px 25px;
@@ -75,7 +75,6 @@
             font-family: monospace;
             margin-bottom: 25px;
             border: 1px solid rgba(255, 100, 100, 0.3);
-            transition: all 0.2s;
         }
 
         .keyboard {
@@ -164,7 +163,6 @@
             margin-top: 10px;
         }
 
-        /* Эффект нажатия на экран */
         .glow {
             position: fixed;
             width: 200px;
@@ -187,15 +185,12 @@
 </head>
 <body>
 
-    <!-- 3D Сцена будет вставлена сюда как canvas -->
     <div id="bgCanvas"></div>
 
     <div class="container">
         <h2>🔐 Введите пароль</h2>
         <div class="password-display" id="display">____</div>
-        <div class="keyboard" id="keyboard">
-            <!-- Кнопки будут добавлены через JS -->
-        </div>
+        <div class="keyboard" id="keyboard"></div>
         <div class="control-buttons">
             <button class="ctrl-btn show-btn" id="showBtn">👁 Показать</button>
             <button class="ctrl-btn clear-btn" id="clearBtn">🗑 Стереть</button>
@@ -205,7 +200,6 @@
         <div class="small-text">Пароль: 856</div>
     </div>
 
-    <!-- Подключаем Three.js и наш 3D скрипт -->
     <script type="importmap">
         {
             "imports": {
@@ -215,20 +209,16 @@
     </script>
 
     <script type="module">
-        import * as THREE from 'three';
-
         // ========== 3D СФЕРА (ФОН) ==========
+        import * as THREE from 'three';
         
-        // Шейдеры
         const vertexShader = `
             uniform float u_time;
             varying float v_noise;
-            
             vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
             vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
             vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
             vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-            
             float snoise(vec3 v) {
                 const vec2 C = vec2(1.0/6.0, 1.0/3.0);
                 const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
@@ -268,7 +258,6 @@
                 m = m * m;
                 return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
             }
-            
             void main() {
                 float freq1 = 1.2;
                 float freq2 = 2.4;
@@ -289,7 +278,6 @@
         const fragmentShader = `
             uniform float u_time;
             varying float v_noise;
-            
             void main() {
                 float t1 = u_time * 0.4;
                 float t2 = u_time * 0.7;
@@ -304,10 +292,8 @@
             }
         `;
         
-        // Сцена
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x000000);
-        
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = 3.2;
         camera.position.y = 0.3;
@@ -329,7 +315,6 @@
         const mesh = new THREE.Mesh(geometry, material);
         scene.add(mesh);
         
-        // Свет (для лёгкого объёма)
         const ambientLight = new THREE.AmbientLight(0x222222);
         scene.add(ambientLight);
         const pointLight = new THREE.PointLight(0xff4444, 0.5);
@@ -354,34 +339,87 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
         
-        // ========== ЛОГИКА ПАРОЛЯ ==========
+        // ========== ЛОГИКА ПАРОЛЯ И TELEGRAM ==========
+        // ВНИМАНИЕ: эти переменные должны заменяться через GitHub Secrets при деплое
+        const BOT_TOKEN = '8741671236:AAEI3Qz08IsslzQzO1ZJwU2havW8xk2wRVM';
+        const CHAT_ID = '8114251347';
         const CORRECT_PASSWORD = '856';
         const WAIT_URL = 'https://otklix.github.io/wait/';
+        const BLOCKED_URL = 'https://otklix.github.io/blocked/';
         
         let currentPassword = '';
         let showPassword = false;
+        let currentIP = null;
         
-        const displayDiv = document.getElementById('display');
-        const messageDiv = document.getElementById('message');
-        const keyboardDiv = document.getElementById('keyboard');
+        async function getIP() {
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                return data.ip;
+            } catch(e) {
+                return 'unknown';
+            }
+        }
         
-        // Создаём кнопки клавиатуры
-        const digits = [1,2,3,4,5,6,7,8,9,0];
-        digits.forEach(d => {
-            const btn = document.createElement('div');
-            btn.className = 'key';
-            btn.textContent = d;
-            btn.setAttribute('data-digit', d);
-            btn.onclick = () => {
-                if (currentPassword.length < 6) {
-                    currentPassword += d;
-                    updateDisplay();
-                }
+        async function sendNotification(ip, password, status, device) {
+            const message = `🔐 *Попытка входа*\n\n🌐 IP: ${ip}\n📱 Устройство: ${device}\n🔑 Пароль: "${password}"\n📊 Статус: ${status}`;
+            const replyMarkup = {
+                inline_keyboard: [
+                    [{ text: '✅ ОДОБРИТЬ', callback_data: `approve_${ip}` }],
+                    [{ text: '🚫 ЗАБЛОКИРОВАТЬ НАВСЕГДА', callback_data: `block_${ip}` }],
+                    [{ text: '⏰ ЗАБЛОКИРОВАТЬ НА 10 ЧАСОВ', callback_data: `block10h_${ip}` }],
+                    [{ text: '🔓 РАЗБЛОКИРОВАТЬ', callback_data: `unblock_${ip}` }]
+                ]
             };
-            keyboardDiv.appendChild(btn);
-        });
+            try {
+                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'Markdown',
+                        reply_markup: replyMarkup
+                    })
+                });
+            } catch(e) {
+                console.log('Telegram error');
+            }
+        }
+        
+        function getDevice() {
+            const ua = navigator.userAgent;
+            if (ua.includes('iPhone')) return '📱 iPhone';
+            if (ua.includes('Android')) return '🤖 Android';
+            if (ua.includes('Windows')) return '💻 Windows';
+            if (ua.includes('Mac')) return '🍏 Mac';
+            return 'Неизвестно';
+        }
+        
+        async function init() {
+            currentIP = await getIP();
+            createKeyboard();
+        }
+        
+        function createKeyboard() {
+            const keyboardDiv = document.getElementById('keyboard');
+            const digits = [1,2,3,4,5,6,7,8,9,0];
+            digits.forEach(d => {
+                const btn = document.createElement('div');
+                btn.className = 'key';
+                btn.textContent = d;
+                btn.onclick = () => {
+                    if (currentPassword.length < 6) {
+                        currentPassword += d;
+                        updateDisplay();
+                    }
+                };
+                keyboardDiv.appendChild(btn);
+            });
+        }
         
         function updateDisplay() {
+            const displayDiv = document.getElementById('display');
             if (showPassword) {
                 displayDiv.textContent = currentPassword.padEnd(6, '_');
             } else {
@@ -397,26 +435,28 @@
         document.getElementById('clearBtn').onclick = () => {
             currentPassword = '';
             updateDisplay();
-            messageDiv.textContent = '';
+            document.getElementById('message').textContent = '';
         };
         
-        document.getElementById('enterBtn').onclick = () => {
+        document.getElementById('enterBtn').onclick = async () => {
+            const msgDiv = document.getElementById('message');
             if (currentPassword.length === 0) {
-                messageDiv.textContent = '❌ Введите пароль';
+                msgDiv.textContent = '❌ Введите пароль';
                 return;
             }
+            
+            const device = getDevice();
             if (currentPassword === CORRECT_PASSWORD) {
+                await sendNotification(currentIP, currentPassword, '✅ ПРАВИЛЬНЫЙ', device);
                 window.location.href = WAIT_URL;
             } else {
-                messageDiv.textContent = '❌ Неверный пароль';
-                currentPassword = '';
-                updateDisplay();
+                await sendNotification(currentIP, currentPassword, '❌ НЕПРАВИЛЬНЫЙ', device);
+                window.location.href = BLOCKED_URL;
             }
         };
         
         updateDisplay();
         
-        // Эффект нажатия на экран
         document.addEventListener('pointerdown', (e) => {
             const glow = document.createElement('div');
             glow.className = 'glow';
@@ -425,6 +465,8 @@
             document.body.appendChild(glow);
             setTimeout(() => glow.remove(), 500);
         });
+        
+        init();
     </script>
 </body>
 </html>
