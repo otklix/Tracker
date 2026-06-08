@@ -107,6 +107,30 @@
         
         const MAX_ATTEMPTS = 5;
         
+        // === ЗАГРУЗКА ЧЁРНОГО СПИСКА ===
+        let blockedIPs = [];
+        
+        async function loadBlockedList() {
+            try {
+                const response = await fetch('blocked.json?t=' + Date.now());
+                if (response.ok) {
+                    blockedIPs = await response.json();
+                }
+            } catch(e) {
+                console.log('Не удалось загрузить чёрный список');
+            }
+        }
+        
+        async function isIPBlocked() {
+            let ip = 'не определён';
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                ip = data.ip;
+            } catch(e) {}
+            return blockedIPs.includes(ip);
+        }
+        
         function isBlockedForever() {
             return localStorage.getItem('blocked_forever') === 'true';
         }
@@ -174,16 +198,19 @@
             }, 400);
         }
         
-        function renderApp() {
+        async function renderApp() {
+            await loadBlockedList();
+            const ipBlocked = await isIPBlocked();
+            const blocked = ipBlocked || isBlockedForever();
+            
             const app = document.getElementById('app');
-            const blocked = isBlockedForever();
             
             if (blocked) {
                 app.innerHTML = `
                     <div class="container blocked">
                         <h2>🔒 ДОСТУП ЗАБЛОКИРОВАН</h2>
-                        <p>Слишком много неудачных попыток.</p>
-                        <p>Доступ запрещён навсегда.</p>
+                        <p>Ваш IP находится в чёрном списке.</p>
+                        <p>Доступ запрещён.</p>
                     </div>
                 `;
                 return;
