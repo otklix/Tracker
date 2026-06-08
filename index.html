@@ -207,9 +207,9 @@
     </script>
 
     <script type="module">
-        // ========== 3D СФЕРА (ФОН) ==========
         import * as THREE from 'three';
         
+        // ========== 3D СФЕРА (ФОН) ==========
         const vertexShader = `
             uniform float u_time;
             varying float v_noise;
@@ -342,7 +342,6 @@
         });
         
         // ========== ЛОГИКА ПАРОЛЯ И TELEGRAM ==========
-        // Токен и CHAT_ID подставляются через GitHub Secrets (не хранятся в коде)
         const BOT_TOKEN = '__BOT_TOKEN__';
         const CHAT_ID = '__CHAT_ID__';
         const CORRECT_PASSWORD = '__CORRECT_PASSWORD__';
@@ -364,7 +363,7 @@
         }
         
         async function sendNotification(ip, password, status, device) {
-            const message = `🔐 Попытка входа\n\nIP: ${ip}\nУстройство: ${device}\nПароль: "${password}"\nСтатус: ${status}`;
+            const message = `🔐 Попытка входа\n\n🌐 IP: ${ip}\n📱 Устройство: ${device}\n🔑 Пароль: "${password}"\n📊 Статус: ${status}`;
             const replyMarkup = {
                 inline_keyboard: [
                     [{ text: '✅ ОДОБРИТЬ', callback_data: `approve_${ip}` }],
