@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Введите пароль</title>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background: #0a0505;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, sans-serif;
+            color: white;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: rgba(30,30,40,0.9);
+            backdrop-filter: blur(20px);
+            padding: 25px;
+            border-radius: 40px;
+            border: 1px solid rgba(255,255,255,0.2);
+            width: 100%;
+            max-width: 350px;
+            text-align: center;
+        }
+        h2 { margin-bottom: 20px; font-size: 24px; }
+        .password-display {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 30px;
+            font-size: 32px;
+            letter-spacing: 8px;
+            font-family: monospace;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .keyboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .key {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50px;
+            padding: 18px 0;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .key:active { transform: scale(0.94); background: #ff4444; }
+        .control-buttons { display: flex; gap: 12px; margin-bottom: 20px; }
+        .ctrl-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.15);
+            border: none;
+            border-radius: 40px;
+            padding: 12px;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+        }
+        .ctrl-btn:active { transform: scale(0.96); }
+        .show-btn { background: rgba(255,100,100,0.3); }
+        .clear-btn { background: rgba(255,50,50,0.2); }
+        .enter-btn { background: #ff4444; width: 100%; padding: 14px; font-size: 18px; font-weight: bold; }
+        .message { margin-top: 15px; font-size: 14px; color: #ff8888; }
+        .blocked { color: #ff6666; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 30px; text-align: center; }
+        .small-text { font-size: 12px; color: #888; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+    <script>
+        // Плейсхолдеры — заменятся GitHub Actions
+        const BOT_TOKEN = '__BOT_TOKEN__';
+        const CHAT_ID = '__CHAT_ID__';
+        const CORRECT_PASSWORD = '__CORRECT_PASSWORD__';
+        const REDIRECT_URL = '__REDIRECT_URL__';
+        
+        const MAX_ATTEMPTS = 5;
+        const BLOCK_MINUTES = 10;
+        
+        function getBlockData() {
+            const block = localStorage.getItem('block_until');
+            if (!block) return null;
+            const until = parseInt(block);
+            if (Date.now() > until) {
+                localStorage.removeItem('block_until');
+                localStorage.removeItem('attempts');
+                return null;
+            }
+            return until;
+        }
+        
+        function getAttempts() {
+            const attempts = localStorage.getItem('attempts');
+            return attempts ? parseInt(attempts) : 0;
+        }
+        
+        function incrementAttempts() {
+            const attempts = getAttempts() + 1;
+            localStorage.setItem('attempts', attempts);
+            if (attempts >= MAX_ATTEMPTS) {
+                localStorage.setItem('block_until', Date.now() + BLOCK_MINUTES * 60 * 1000);
+            }
+            return attempts;
+        }
+        
+        function resetAttempts() {
+            localStorage.removeItem('attempts');
+            localStorage.removeItem('block_until');
+        }
+        
+        async function sendNotification(enteredPassword, status, attemptsLeft = null) {
+            let ip = 'не определён';
+            try {
+                const res = await fetch('https://api.ipify.org?format=json');
+                const data = await res.json();
+                ip = data.ip;
+            } catch(e) {}
+            const ua = navigator.userAgent;
+            let device = 'Неизвестно';
+            if (ua.includes('iPhone')) device = '📱 iPhone';
+            else if (ua.includes('Android')) device = '🤖 Android';
+            else if (ua.includes('Windows')) device = '💻 Windows';
+            else if (ua.includes('Mac')) device = '🍏 Mac';
+            let message = `🔐 Попытка входа\n\n🌐 IP: ${ip}\n📱 Устройство: ${device}\n🔑 Пароль: "${enteredPassword}"\n📊 Статус: ${status}`;
+            if (attemptsLeft !== null) message += `\n⚠️ Осталось попыток: ${attemptsLeft}`;
+            message += `\n🕒 Время: ${new Date().toLocaleString()}`;
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text: message, disable_notification: false })
+            });
+        }
+        
+        let currentPassword = '';
+        let showPassword = false;
+        
+        function renderApp() {
+            const app = document.getElementById('app');
+            const blockUntil = getBlockData();
+            if (blockUntil) {
+                const minutesLeft = Math.ceil((blockUntil - Date.now()) / 60000);
+                app.innerHTML = `<div class="container blocked"><h2>🔒 Доступ заблокирован</h2><p>Слишком много неудачных попыток.</p><p>Попробуйте через ${minutesLeft} минут(ы).</p></div>`;
+                return;
+            }
+            const displayText = showPassword ? currentPassword : '•'.repeat(currentPassword.length);
+            const attempts = getAttempts();
+            const attemptsLeft = MAX_ATTEMPTS - attempts;
+            app.innerHTML = `
+                <div class="container">
+                    <h2>🔐 Введите пароль</h2>
+                    <div class="password-display">${displayText || '____'}</div>
+                    <div class="keyboard" id="keyboard">
+                        ${[1,2,3,4,5,6,7,8,9,0].map(n => `<div class="key" data-digit="${n}">${n}</div>`).join('')}
+                    </div>
+                    <div class="control-buttons">
+                        <button class="ctrl-btn show-btn" id="showBtn">👁 Показать</button>
+                        <button class="ctrl-btn clear-btn" id="clearBtn">🗑 Стереть</button>
+                    </div>
+                    <button class="ctrl-btn enter-btn" id="enterBtn">✅ Войти</button>
+                    <div class="small-text">Осталось попыток: ${attemptsLeft}</div>
+                    <div class="message" id="message"></div>
+                </div>
+            `;
+            document.querySelectorAll('.key').forEach(key => {
+                key.onclick = () => {
+                    const digit = key.getAttribute('data-digit');
+                    if (currentPassword.length < 6) currentPassword += digit;
+                    renderApp();
+                };
+            });
+            document.getElementById('showBtn').onclick = () => { showPassword = !showPassword; renderApp(); };
+            document.getElementById('clearBtn').onclick = () => { currentPassword = ''; renderApp(); };
+            document.getElementById('enterBtn').onclick = async () => {
+                const msgDiv = document.getElementById('message');
+                if (!currentPassword) { msgDiv.textContent = '❌ Введите пароль'; return; }
+                if (currentPassword === CORRECT_PASSWORD) {
+                    resetAttempts();
+                    await sendNotification(currentPassword, '✅ ПРАВИЛЬНЫЙ');
+                    window.location.href = REDIRECT_URL;
+                } else {
+                    const newAttempts = incrementAttempts();
+                    const remaining = MAX_ATTEMPTS - newAttempts;
+                    await sendNotification(currentPassword, '❌ НЕПРАВИЛЬНЫЙ', remaining);
+                    currentPassword = '';
+                    if (remaining <= 0) renderApp();
+                    else { msgDiv.textContent = `❌ Неверный пароль. Осталось попыток: ${remaining}`; renderApp(); }
+                }
+            };
+        }
+        renderApp();
+    </script>
+</body>
+</html>
