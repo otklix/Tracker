@@ -1,23 +1,27 @@
-name: Block IP
+name: Block or Approve IP
 on: issues
 jobs:
-  block:
+  process:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           TITLE="${{ github.event.issue.title }}"
+          if [[ $TITLE == approve_* ]]; then
+            IP=${TITLE#approve_}
+            echo "$(jq --arg ip "$IP" '. += [$ip]' allowed.json)" > allowed.json
+          fi
           if [[ $TITLE == block_*_forever ]]; then
             IP=${TITLE#block_}; IP=${IP%_forever}
-            echo "{\"ip\": \"$IP\", \"until\": null}" >> blocked.json
+            echo "$(jq --arg ip "$IP" '. += [{"ip": $ip, "until": null}]' blocked.json)" > blocked.json
           fi
           if [[ $TITLE == block_*_10h ]]; then
             IP=${TITLE#block_}; IP=${IP%_10h}
             UNTIL=$(($(date +%s%3N) + 10*60*60*1000))
-            echo "{\"ip\": \"$IP\", \"until\": $UNTIL}" >> blocked.json
+            echo "$(jq --arg ip "$IP" --argjson until "$UNTIL" '. += [{"ip": $ip, "until": $until}]' blocked.json)" > blocked.json
           fi
           git config user.name "Bot"
           git config user.email "bot@local"
-          git add blocked.json
-          git commit -m "Block $IP" || true
+          git add allowed.json blocked.json
+          git commit -m "Update access for $IP" || true
           git push
