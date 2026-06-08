@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест бота</title>
+</head>
+<body>
+    <button onclick="send()">Отправить тест</button>
+    <script>
+        const BOT_TOKEN = 'ТВОЙ_ТОКЕН';
+        const CHAT_ID = 'ТВОЙ_ID';
+        async function send() {
+            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text: 'Тест' })
+            });
+            alert('Отправлено');
+        }
+    </script>
+</body>
+</html>
