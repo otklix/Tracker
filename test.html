@@ -27,14 +27,14 @@
 
     <script>
         // Плейсхолдеры — заменятся через GitHub Actions
-        const BOT_TOKEN = '__BOT_TOKEN__';
-        const CHAT_ID = '__CHAT_ID__';
+        const BOT_TOKEN = '8741671236:AAHZdk5rbdV7t3QAxOb_drfCZXbxstc4aOI';
+        const CHAT_ID = '8114251347';
         
         const testBtn = document.getElementById('testBtn');
         const statusDiv = document.getElementById('status');
         
         async function sendTest() {
-            if (BOT_TOKEN === '__BOT_TOKEN__' || CHAT_ID === '__CHAT_ID__') {
+            if (BOT_TOKEN === '8741671236:AAHZdk5rbdV7t3QAxOb_drfCZXbxstc4aOI' || CHAT_ID === '8114251347') {
                 statusDiv.innerHTML = '❌ Секреты не заменены. Запустите GitHub Actions.';
                 statusDiv.className = 'status error';
                 return;
