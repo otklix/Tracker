@@ -6,8 +6,8 @@
 <body>
     <button onclick="send()">Отправить тест</button>
     <script>
-        const BOT_TOKEN = 'ТВОЙ_ТОКЕН';
-        const CHAT_ID = 'ТВОЙ_ID';
+        const BOT_TOKEN = '__BOT_TOKEN__';
+const CHAT_ID = '__CHAT_ID__';
         async function send() {
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
