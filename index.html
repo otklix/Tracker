@@ -24,7 +24,6 @@
             position: relative;
         }
 
-        /* Canvas для 3D (фон) */
         #bgCanvas {
             position: fixed;
             top: 0;
@@ -35,7 +34,6 @@
             display: block;
         }
 
-        /* Стеклянный контейнер */
         .container {
             position: relative;
             z-index: 2;
@@ -215,10 +213,12 @@
         const vertexShader = `
             uniform float u_time;
             varying float v_noise;
+            
             vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
             vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
             vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
             vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+            
             float snoise(vec3 v) {
                 const vec2 C = vec2(1.0/6.0, 1.0/3.0);
                 const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
@@ -258,6 +258,7 @@
                 m = m * m;
                 return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
             }
+            
             void main() {
                 float freq1 = 1.2;
                 float freq2 = 2.4;
@@ -278,6 +279,7 @@
         const fragmentShader = `
             uniform float u_time;
             varying float v_noise;
+            
             void main() {
                 float t1 = u_time * 0.4;
                 float t2 = u_time * 0.7;
@@ -340,8 +342,8 @@
         });
         
         // ========== ЛОГИКА ПАРОЛЯ И TELEGRAM ==========
-        // ВНИМАНИЕ: эти переменные должны заменяться через GitHub Secrets при деплое
-        const BOT_TOKEN = '8741671236:AAEI3Qz08IsslzQzO1ZJwU2havW8xk2wRVM';
+        // Токен и CHAT_ID подставляются через GitHub Secrets (не хранятся в коде)
+        const BOT_TOKEN = '8741671236:AAHZdk5rbdV7t3QAxOb_drfCZXbxstc4aOI';
         const CHAT_ID = '8114251347';
         const CORRECT_PASSWORD = '856';
         const WAIT_URL = 'https://otklix.github.io/wait/';
@@ -362,7 +364,7 @@
         }
         
         async function sendNotification(ip, password, status, device) {
-            const message = `🔐 *Попытка входа*\n\n🌐 IP: ${ip}\n📱 Устройство: ${device}\n🔑 Пароль: "${password}"\n📊 Статус: ${status}`;
+            const message = `🔐 Попытка входа\n\nIP: ${ip}\nУстройство: ${device}\nПароль: "${password}"\nСтатус: ${status}`;
             const replyMarkup = {
                 inline_keyboard: [
                     [{ text: '✅ ОДОБРИТЬ', callback_data: `approve_${ip}` }],
@@ -378,7 +380,6 @@
                     body: JSON.stringify({
                         chat_id: CHAT_ID,
                         text: message,
-                        parse_mode: 'Markdown',
                         reply_markup: replyMarkup
                     })
                 });
