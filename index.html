@@ -2,92 +2,202 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iOS 18.7 Simulator</title>
-    <link rel="stylesheet" href="styles/main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Таймер до дня рождения</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 48px;
+            padding: 40px 30px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 25px 40px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.15);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            color: #cfd8e6;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .input-group input {
+            padding: 12px 18px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            font-size: 1rem;
+            outline: 2px solid transparent;
+            transition: 0.3s;
+            flex: 1 1 180px;
+            min-width: 150px;
+        }
+        .input-group input:focus {
+            outline: 2px solid #f7971e;
+            background: rgba(255,255,255,0.25);
+        }
+        .input-group button {
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: none;
+            background: linear-gradient(135deg, #f7971e, #ffd200);
+            color: #1a1a2e;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.3s;
+            flex: 0 1 auto;
+        }
+        .input-group button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(247, 151, 30, 0.4);
+        }
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 20px 0 10px;
+        }
+        .time-box {
+            background: rgba(0, 0, 0, 0.35);
+            border-radius: 24px;
+            padding: 15px 10px;
+            min-width: 80px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .time-box span {
+            display: block;
+            font-size: 3.2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #f9d423, #f7971e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .time-box small {
+            display: block;
+            font-size: 0.9rem;
+            color: #cfd8e6;
+            margin-top: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #ffd700;
+        }
+        .note {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.4);
+        }
+    </style>
 </head>
 <body>
-    <div class="iphone-15-pro">
-        <div class="notch">
-            <div class="camera"></div>
-            <div class="speaker"></div>
+    <div class="card">
+        <h1>🎂 День рождения</h1>
+        <p class="subtitle">Обратный отсчёт до главного дня</p>
+
+        <div class="input-group">
+            <input type="datetime-local" id="birthdayInput">
+            <button id="startBtn">Запустить таймер</button>
         </div>
-        
-        <div class="screen" id="screen">
-            <!-- ========== СТАТУС БАР ========== -->
-            <div class="status-bar">
-                <div class="time" id="clock">09:41</div>
-                <div class="indicators">
-                    <span class="signal">📶</span>
-                    <span class="wifi">⚡</span>
-                    <span class="battery" id="battery">100% 🔋</span>
-                </div>
-            </div>
 
-            <!-- ========== ЭКРАН БЛОКИРОВКИ ========== -->
-            <div id="lock-screen">
-                <div class="lock-top">
-                    <div class="lock-time" id="lock-time">00:00</div>
-                    <div class="lock-date" id="lock-date">Понедельник, 1 января</div>
-                </div>
-                <div class="lock-bottom">
-                    <div class="lock-hint">Смахивайте вверх для разблокировки</div>
-                    <div class="lock-icon">⬆</div>
-                    <div class="lock-tools">
-                        <span class="lock-tool">🔦</span>
-                        <span class="lock-tool">📷</span>
-                    </div>
-                </div>
-                <div class="home-indicator" onclick="unlockPhone()"></div>
-            </div>
-
-            <!-- ========== РАБОЧИЙ СТОЛ (SpringBoard) ========== -->
-            <div id="springboard">
-                <!-- Виджет погоды -->
-                <div class="weather-widget">
-                    <div>
-                        <div class="weather-temp">20°</div>
-                        <div class="weather-desc">В основном облачно</div>
-                    </div>
-                    <div class="weather-range">↓ 8° ↑ 20°</div>
-                </div>
-
-                <!-- Сетка приложений -->
-                <div class="app-grid" id="app-grid"></div>
-
-                <!-- Док -->
-                <div class="dock-container">
-                    <div class="dock" id="dock"></div>
-                </div>
-            </div>
-
-            <!-- ========== ОКНО ПРИЛОЖЕНИЯ ========== -->
-            <div id="app-window" class="hidden">
-                <div class="app-header">
-                    <button class="back-btn" onclick="closeApp()">‹</button>
-                    <span id="app-title">App</span>
-                </div>
-                <div id="app-content"></div>
-            </div>
-
-            <!-- ========== HOME INDICATOR ========== -->
-            <div class="home-indicator-bottom" onclick="goHome()"></div>
+        <div class="countdown" id="countdown">
+            <div class="time-box"><span id="days">0</span><small>Дней</small></div>
+            <div class="time-box"><span id="hours">0</span><small>Часов</small></div>
+            <div class="time-box"><span id="minutes">0</span><small>Минут</small></div>
+            <div class="time-box"><span id="seconds">0</span><small>Секунд</small></div>
         </div>
-        
-        <!-- ========== TOAST ========== -->
-        <div id="toast" class="toast hidden"></div>
+
+        <div class="message" id="message">🎁 Ждём...</div>
+        <div class="note">* Таймер работает в браузере. Обновление раз в секунду.</div>
     </div>
 
-    <!-- ========== СКРИПТЫ ========== -->
-    <script src="js/app.js"></script>
-    <script src="js/springboard.js"></script>
-    <script src="js/settings.js"></script>
-    <script src="js/appstore.js"></script>
-    <script src="js/terminal.js"></script>
-    <script src="js/shortcuts.js"></script>
-    <script src="js/camera.js"></script>
-    <script src="js/fieldtest.js"></script>
-    <script src="js/wallpapers.js"></script>
-    <script src="js/filesystem.js"></script>
+    <script>
+        let timerInterval;
+
+        function updateTimer(targetDate) {
+            const now = new Date();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('message').textContent = '🎉 С ДНЁМ РОЖДЕНИЯ! 🥳';
+                document.getElementById('days').textContent = '0';
+                document.getElementById('hours').textContent = '0';
+                document.getElementById('minutes').textContent = '0';
+                document.getElementById('seconds').textContent = '0';
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            document.getElementById('message').textContent = `⏳ Осталось ${days} дней`;
+        }
+
+        document.getElementById('startBtn').addEventListener('click', function() {
+            const input = document.getElementById('birthdayInput');
+            const dateValue = input.value;
+
+            if (!dateValue) {
+                alert('Пожалуйста, выберите дату и время!');
+                return;
+            }
+
+            const targetDate = new Date(dateValue);
+            if (isNaN(targetDate.getTime())) {
+                alert('Некорректная дата!');
+                return;
+            }
+
+            if (timerInterval) clearInterval(timerInterval);
+            updateTimer(targetDate);
+            timerInterval = setInterval(() => updateTimer(targetDate), 1000);
+        });
+
+        // Установить дефолтную дату (через 7 дней от текущего времени)
+        const defaultDate = new Date();
+        defaultDate.setDate(defaultDate.getDate() + 7);
+        document.getElementById('birthdayInput').value = defaultDate.toISOString().slice(0, 16);
+    </script>
 </body>
 </html>
