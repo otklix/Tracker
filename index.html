@@ -4,250 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎂 День рождения</title>
+    <!-- Библиотека для конфетти -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Georgia', 'Times New Roman', serif;
-            background: #fff8e7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0f2f5;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow: hidden;
         }
-        
-        /* Фон с эмодзи (такой же) */
-        .bg-emojis {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .float-emoji {
-            position: absolute;
-            font-size: 2.5rem;
-            opacity: 0.6;
-            animation: floatUp linear infinite;
-            text-shadow: 0 0 20px rgba(255, 200, 150, 0.3);
-            filter: drop-shadow(0 0 10px rgba(255, 100, 50, 0.2));
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(100vh) rotate(0deg) scale(0.8); opacity: 0; }
-            10% { opacity: 0.6; }
-            90% { opacity: 0.6; }
-            100% { transform: translateY(-10vh) rotate(720deg) scale(1.2); opacity: 0; }
-        }
-
-        /* Карточка — новый праздничный стиль */
         .card {
-            background: #ffffff;
-            border-radius: 60px 60px 60px 60px;
-            padding: 45px 35px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 56px;
+            padding: 40px 30px;
             max-width: 700px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(200, 150, 100, 0.3), 0 10px 30px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
             text-align: center;
             position: relative;
             z-index: 10;
-            border: 2px solid rgba(255, 200, 150, 0.3);
         }
-        
-        /* Декоративные полоски сверху и снизу */
-        .card::before, .card::after {
-            content: '🎂';
-            position: absolute;
-            font-size: 2.5rem;
-            opacity: 0.2;
-        }
-        .card::before { top: -15px; left: 20px; transform: rotate(-20deg); }
-        .card::after { bottom: -15px; right: 20px; transform: rotate(20deg); }
-
         h1 {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #5c3d2e;
+            font-size: 2.6rem;
+            font-weight: 600;
+            color: #1c1c1e;
             margin-bottom: 5px;
-            letter-spacing: 2px;
-            font-family: 'Georgia', serif;
         }
-        h1 span { color: #f28b82; }
-        
-        .subtitle {
-            color: #b08a7a;
-            margin-bottom: 30px;
-            font-size: 1.1rem;
-            letter-spacing: 1px;
-            font-style: italic;
-        }
+        h1 span { color: #ee5a24; }
+        .subtitle { color: #8e8e93; margin-bottom: 30px; }
         
         .input-group {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 12px;
-            margin-bottom: 35px;
+            display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 35px;
         }
         .input-group input {
-            padding: 16px 24px;
-            border-radius: 40px;
-            border: 2px solid #f5e3d5;
-            background: #fdfaf7;
-            color: #5c3d2e;
-            font-size: 1rem;
-            outline: none;
-            flex: 1 1 180px;
-            min-width: 150px;
-            transition: 0.3s;
-            font-family: 'Georgia', serif;
+            padding: 16px 24px; border-radius: 40px; border: 1px solid #d1d1d6;
+            background: #fff; font-size: 1rem; outline: none; flex: 1 1 180px; min-width: 150px;
         }
-        .input-group input:focus {
-            border-color: #f28b82;
-            box-shadow: 0 0 0 4px rgba(242, 139, 130, 0.1);
-        }
+        .input-group input:focus { border-color: #ee5a24; }
         .input-group button {
-            padding: 16px 40px;
-            border-radius: 40px;
-            border: none;
-            background: #f28b82;
-            color: #fff;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 6px 20px rgba(242, 139, 130, 0.3);
-            flex: 0 1 auto;
-            font-family: 'Georgia', serif;
-            letter-spacing: 1px;
+            padding: 16px 40px; border-radius: 40px; border: none;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: #fff; font-weight: 600; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 8px 20px rgba(238, 90, 36, 0.25);
+            transition: 0.3s; flex: 0 1 auto;
         }
-        .input-group button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(242, 139, 130, 0.4);
-            background: #e07a72;
-        }
+        .input-group button:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(238, 90, 36, 0.35); }
         .input-group button:active { transform: scale(0.96); }
         
-        .countdown {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin: 10px 0 15px;
-        }
+        .countdown { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 10px 0 15px; }
         .time-box {
-            background: #fdfaf7;
-            border-radius: 24px;
-            padding: 12px 8px;
-            min-width: 70px;
-            border: 2px solid #f5e3d5;
-            box-shadow: 0 4px 12px rgba(200, 150, 100, 0.1);
-            transition: 0.3s;
+            background: #fff; border-radius: 24px; padding: 12px 8px; min-width: 70px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         }
-        .time-box:hover {
-            border-color: #f28b82;
-            box-shadow: 0 4px 20px rgba(242, 139, 130, 0.15);
-        }
-        .time-box span {
-            display: block;
-            font-size: 3.4rem;
-            font-weight: 700;
-            color: #5c3d2e;
-            line-height: 1;
-            font-family: 'Georgia', serif;
-        }
-        .time-box small {
-            display: block;
-            font-size: 0.75rem;
-            color: #b08a7a;
-            margin-top: 4px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .ms-box {
-            background: #fdf3ef;
-            border: 2px solid #f28b82;
-        }
-        .ms-box span {
-            font-size: 2.8rem;
-            color: #f28b82;
-        }
+        .time-box span { display: block; font-size: 3.4rem; font-weight: 700; color: #1c1c1e; line-height: 1; }
+        .time-box small { display: block; font-size: 0.75rem; color: #8e8e93; margin-top: 4px; }
+        .ms-box { background: #f8f8fa; border: 1px solid #e5e5ea; }
+        .ms-box span { font-size: 2.8rem; color: #ee5a24; }
         
         .message {
-            margin-top: 30px;
-            font-size: 1.6rem;
-            font-weight: 500;
-            color: #5c3d2e;
-            padding: 12px 20px;
-            border-radius: 40px;
-            display: inline-block;
-            font-family: 'Georgia', serif;
-            background: #fdfaf7;
-            border: 2px solid #f5e3d5;
+            margin-top: 30px; font-size: 1.5rem; font-weight: 500; color: #1c1c1e;
+            padding: 12px 20px; border-radius: 40px; display: inline-block;
         }
-        .message .highlight {
-            color: #f28b82;
-            font-weight: 700;
-        }
+        .message .highlight { color: #ee5a24; font-weight: 700; }
 
-        /* ========== МОДАЛЬНОЕ ОКНО (НОВОЕ, ТЁПЛОЕ) ========== */
+        /* ========== МОДАЛЬНОЕ ОКНО (ПОЗДРАВЛЕНИЕ) ========== */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255, 248, 231, 0.8);
-            backdrop-filter: blur(6px);
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px);
             display: none; justify-content: center; align-items: center;
             z-index: 9999; padding: 20px;
         }
         .modal-overlay.active { display: flex; }
         .modal-box {
-            background: #ffffff;
-            border-radius: 48px; padding: 50px 40px;
+            background: #fff; border-radius: 48px; padding: 50px 40px;
             max-width: 450px; width: 100%; text-align: center;
-            border: 2px solid #f5e3d5;
-            box-shadow: 0 30px 60px rgba(200, 150, 100, 0.3);
-            animation: popUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.3);
+            animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
-        .modal-box h2 {
-            font-size: 3rem;
-            color: #f28b82;
-            margin-bottom: 15px;
-            font-family: 'Georgia', serif;
-        }
-        .modal-box p {
-            font-size: 1.2rem;
-            color: #5c3d2e;
-            line-height: 1.6;
-            margin-bottom: 25px;
-            font-family: 'Georgia', serif;
-        }
+        .modal-box h2 { font-size: 2.5rem; color: #ee5a24; margin-bottom: 15px; }
+        .modal-box p { font-size: 1.1rem; color: #1c1c1e; line-height: 1.6; margin-bottom: 25px; }
         .modal-box button {
             padding: 14px 40px; border-radius: 40px; border: none;
-            background: #f28b82; color: #fff;
-            font-weight: 700; font-size: 1.2rem; cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 6px 20px rgba(242, 139, 130, 0.3);
-            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: #fff; font-weight: 600; font-size: 1.2rem; cursor: pointer;
+            transition: 0.3s; box-shadow: 0 8px 20px rgba(238, 90, 36, 0.25);
         }
-        .modal-box button:hover { transform: scale(1.05); background: #e07a72; }
+        .modal-box button:hover { transform: scale(1.05); box-shadow: 0 12px 28px rgba(238, 90, 36, 0.35); }
 
         @keyframes popUp {
-            0% { transform: scale(0.5) rotate(-5deg); opacity: 0; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        .note {
-            margin-top: 20px;
-            font-size: 0.8rem;
-            color: #c8b8a8;
-            font-style: italic;
-        }
+        .note { margin-top: 20px; font-size: 0.8rem; color: #aeaeb2; }
     </style>
 </head>
 <body>
-    <!-- Фон с анимированными эмодзи -->
-    <div class="bg-emojis" id="emojiContainer"></div>
-
     <!-- Главная карточка -->
     <div class="card">
         <h1>🎂 День <span>рождения</span></h1>
@@ -255,7 +113,7 @@
 
         <div class="input-group">
             <input type="datetime-local" id="birthdayInput">
-            <button id="startBtn">🎈 Запустить</button>
+            <button id="startBtn">Запустить</button>
         </div>
 
         <div class="countdown">
@@ -267,38 +125,23 @@
         </div>
 
         <div class="message" id="message">⌛ Ожидание...</div>
-        <div class="note">✨ Тёплый праздничный стиль</div>
+        <div class="note">* Обновление каждые 10 мс</div>
     </div>
 
-    <!-- Модальное окно -->
+    <!-- Модальное окно с поздравлением -->
     <div class="modal-overlay" id="modal">
         <div class="modal-box">
             <h2>🎉 С днём рождения!</h2>
-            <p>Пусть этот день будет полон радости, счастья и любви!<br>☀️ Свети ярко! 🌟</p>
+            <p>Пусть этот день будет полон радости, счастья и любви!<br>☀️ Удачи и исполнения желаний! 🌟</p>
             <button id="closeModalBtn">Спасибо! ✨</button>
         </div>
     </div>
 
     <script>
-        // Генерация летающих эмодзи (осталась без изменений)
-        const emojis = ['🎂', '🎈', '🎁', '🥳', '✨', '🎊', '💫', '🌟', '🎉', '🍰'];
-        const container = document.getElementById('emojiContainer');
-        
-        for (let i = 0; i < 30; i++) {
-            const span = document.createElement('span');
-            span.className = 'float-emoji';
-            span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-            span.style.left = Math.random() * 100 + '%';
-            span.style.fontSize = (Math.random() * 2 + 1.5) + 'rem';
-            span.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            span.style.animationDelay = (Math.random() * 20) + 's';
-            container.appendChild(span);
-        }
-
-        // Логика таймера (без изменений)
         let timerInterval;
 
         function fireConfetti() {
+            // Массовый выброс конфетти
             for (let i = 0; i < 3; i++) {
                 setTimeout(() => {
                     confetti({
@@ -308,15 +151,16 @@
                     });
                 }, i * 300);
             }
+            // Бонусные маленькие звёздочки
             setTimeout(() => {
                 confetti({
-                    particleCount: 80,
+                    particleCount: 50,
                     spread: 100,
                     origin: { y: 0.5 },
                     startVelocity: 30,
-                    colors: ['#f28b82', '#ffd93d', '#6bcb77', '#4d96ff', '#ff6bb5']
+                    colors: ['#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff']
                 });
-            }, 900);
+            }, 800);
         }
 
         function updateTimer(targetDate) {
@@ -332,6 +176,7 @@
                 document.getElementById('seconds').textContent = '00';
                 document.getElementById('milliseconds').textContent = '000';
                 
+                // Включаем конфетти и модальное окно
                 fireConfetti();
                 document.getElementById('modal').classList.add('active');
                 return;
@@ -363,6 +208,7 @@
             let targetDate = new Date(dateValue);
             const now = new Date();
 
+            // Защита от "0 дней", если дата уже прошла в этом году
             if (targetDate.getFullYear() === now.getFullYear() && targetDate < now) {
                 targetDate.setFullYear(targetDate.getFullYear() + 1);
                 input.value = targetDate.toISOString().slice(0, 16);
@@ -374,23 +220,26 @@
             }
 
             if (timerInterval) clearInterval(timerInterval);
+            // Сбрасываем модалку, если она была открыта
             document.getElementById('modal').classList.remove('active');
             
             updateTimer(targetDate);
             timerInterval = setInterval(() => updateTimer(targetDate), 10);
         });
 
+        // Закрытие модального окна по кнопке
         document.getElementById('closeModalBtn').addEventListener('click', function() {
             document.getElementById('modal').classList.remove('active');
         });
         
+        // Закрытие по клику на фон (оверлей)
         document.getElementById('modal').addEventListener('click', function(e) {
             if (e.target === this) {
                 this.classList.remove('active');
             }
         });
 
-        // Дефолтная дата (через 7 дней)
+        // Установка дефолтной даты (через 7 дней)
         const defaultDate = new Date();
         defaultDate.setDate(defaultDate.getDate() + 7);
         document.getElementById('birthdayInput').value = defaultDate.toISOString().slice(0, 16);
